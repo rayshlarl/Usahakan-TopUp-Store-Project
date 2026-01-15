@@ -62,8 +62,6 @@ app.get("/:cat/:game_id", async (req, res) => {
   }
 });
 
-// Di akhir app.js, sebelum export default app
-
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
