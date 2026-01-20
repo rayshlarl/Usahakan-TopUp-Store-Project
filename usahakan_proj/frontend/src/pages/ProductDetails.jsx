@@ -6,32 +6,31 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-import { useCart } from "../../../backend/src/context/CartContext";
+import { useCart } from "../store/CartContext";
 
 const ProductDetails = () => {
   const { addToCart } = useCart();
 
-  const [product_items, setProduct_items] = useState([]);
+  const [productItems, setProductItems] = useState([]);
   const [inputFields, setInputFields] = useState([]);
   const [inputData, setInputData] = useState({});
   const [errors, setErrors] = useState({});
-  const { category, id } = useParams();
+  const { category, id } = useParams(); // -> get url
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProduct_items = async () => {
+    const fetchProductItems = async () => {
       try {
         const response = await getProductItems(category, id);
 
-        if (!response.product_id?.rows?.length) {
-          console.log(!response?.rows?.length);
+        if (!response.packages?.length) {
           navigate("/");
         }
 
-        setProduct_items(response.product_id.rows);
+        setProductItems(response.packages);
 
-        const fields = response.input_fields || [];
+        const fields = response.inputFields || [];
         setInputFields(fields);
 
         const initialData = {};
@@ -43,7 +42,7 @@ const ProductDetails = () => {
         console.error(err);
       }
     };
-    fetchProduct_items();
+    fetchProductItems();
   }, [category, id]);
 
   const handleInputChange = (fieldName, value) => {
@@ -66,7 +65,7 @@ const ProductDetails = () => {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // true jika tidak ada error
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleAddToCart = (item) => {
@@ -75,7 +74,8 @@ const ProductDetails = () => {
     addToCart({
       id: item.id,
       name: item.name,
-      game: id,
+      product: id,
+      category: category,
       price: item.price,
       icon: item.icon,
       inputData: { ...inputData },
@@ -110,7 +110,7 @@ const ProductDetails = () => {
               <div className="w-full p-6 mt-5 bg-white rounded-xl shadow-md">
                 <h2 className="text-lg font-bold mb-4">Pilih Nominal</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {product_items.map((item, index) => (
+                  {productItems.map((item, index) => (
                     <div
                       key={index}
                       className="rounded-xl overflow-hidden shadow-md bg-white border border-blue-300 hover:shadow-lg hover:-translate-y-2 transition-all duration-200 flex flex-col"

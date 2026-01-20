@@ -1,4 +1,3 @@
-import SideBar from "../components/Sidebar";
 import { Header } from "../components/Header";
 import { Banner } from "../components/banner";
 import { Product } from "../components/product";

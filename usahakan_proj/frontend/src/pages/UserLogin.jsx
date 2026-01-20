@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FloatingInput } from "../components/FloatingInput";
 import LoginBg from "../assets/loginbg.png";
+import { sendUserData } from "../api/users_api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -17,18 +18,29 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
 
-    if (!form.email || !form.password) {
-      setError("Email dan password wajib diisi");
-      return;
-    }
-
     setLoading(true);
     try {
-      // TODO: Ganti dengan API login
-      console.log("Login:", form);
-      navigate("/");
+      const result = await sendUserData(form.email, form.password);
+      //   console.log(result);
+
+      // Kalau berhasil, redirect ke home
+      if (result.success) {
+        console.log(result.user.role);
+        if (result.user.role === "seller") {
+          console.log("redirected");
+        }
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        navigate("/");
+      } else {
+        setError("Email atau password salah");
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Login gagal");
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.errors[0]?.msg ||
+          "Login gagal, coba lagi"
+      );
     } finally {
       setLoading(false);
     }
@@ -58,16 +70,19 @@ const LoginPage = () => {
             Halo kak. Silahkan masuk ke akun mu dulu ya :D
           </p>
         </div>
+        {error && (
+          <p className="text-red-500 text-sm text-center pb-5">{error}</p>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <FloatingInput
             label="Email"
-            type="email"
+            type="text"
             name="email"
             value={form.email}
             onChange={handleChange}
-            placeholder="contoh@email.com"
+            placeholder="Email@kamu.com"
           />
 
           <FloatingInput
@@ -76,7 +91,7 @@ const LoginPage = () => {
             name="password"
             value={form.password}
             onChange={handleChange}
-            placeholder="Masukkan password"
+            placeholder="Password Kamu"
           />
 
           <div className="pl-3 mt-[-10px]">
@@ -84,8 +99,6 @@ const LoginPage = () => {
               Lupa password?
             </p>
           </div>
-
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <button
             type="submit"
