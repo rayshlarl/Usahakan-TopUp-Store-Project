@@ -3,6 +3,8 @@ import cors from "cors";
 import homeRoutes from "./routes/homeRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 const app = express();
 
@@ -14,6 +16,8 @@ app.use(express.json());
 app.use("/", homeRoutes);
 app.use("/", authRoutes);
 app.use("/", productRoutes);
+app.use("/", dashboardRoutes);
+app.use("/", orderRoutes);
 
 // 404 Handler
 app.use((req, res) => {

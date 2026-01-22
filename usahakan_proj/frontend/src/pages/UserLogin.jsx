@@ -21,15 +21,17 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const result = await sendUserData(form.email, form.password);
-      //   console.log(result);
+      // console.log(result);
 
       // Kalau berhasil, redirect ke home
       if (result.success) {
-        console.log(result.user.role);
         if (result.user.role === "seller") {
-          console.log("redirected");
+          // console.log("sup");
+          localStorage.setItem("user", JSON.stringify(result.user));
+          localStorage.setItem("token", result.token);
+          navigate("/dashboard");
+          return 0;
         }
-        localStorage.setItem("token", result.token);
         localStorage.setItem("user", JSON.stringify(result.user));
         navigate("/");
       } else {

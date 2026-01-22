@@ -1,10 +1,10 @@
-import { pool, userTable } from "../config/dbConnect.js";
+import { prisma } from "../config/prisma.js";
 
 // Get all users
 const loadUsers = async () => {
     try {
-        const result = await pool.query(`SELECT * FROM ${userTable}`);
-        return result;
+        const result = await prisma.user_db.findMany();
+        return { rows: result };
     } catch (err) {
         console.error(err);
     }
@@ -13,11 +13,13 @@ const loadUsers = async () => {
 // Get user by email and password (for login)
 const getUserInformation = async (email, password) => {
     try {
-        const result = await pool.query(
-            `SELECT * FROM ${userTable} WHERE email = $1 AND password = $2`,
-            [email, password]
-        );
-        return result;
+        const result = await prisma.user_db.findFirst({
+            where: {
+                email: email,
+                password: password,
+            },
+        });
+        return { rows: result ? [result] : [] };
     } catch (err) {
         console.error(err);
     }

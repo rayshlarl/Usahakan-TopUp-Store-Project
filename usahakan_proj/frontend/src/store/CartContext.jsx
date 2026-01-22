@@ -50,7 +50,6 @@ const CartProvider = ({ children }) => {
       }
     });
   };
-  console.log(cartSelected);
 
   return (
     <CartContext.Provider

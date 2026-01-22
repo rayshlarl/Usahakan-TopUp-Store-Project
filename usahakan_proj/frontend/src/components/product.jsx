@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getDashboardData } from "../api/users_api";
+import { getDefaultData } from "../api/users_api";
 
 const Product = () => {
   const [category, setCategory] = useState([]);
@@ -11,7 +11,7 @@ const Product = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getDashboardData();
+        const response = await getDefaultData();
         setCategory(response.categoryData);
         setProducts(response.productsData);
       } catch (err) {

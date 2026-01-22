@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model categories {
+  id         Int        @id @default(autoincrement())
+  name       String     @db.VarChar(100)
+  created_at DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at DateTime?  @default(now()) @db.Timestamp(6)
+  products   products[]
+}
+
+model input_type_fields {
+  id            Int         @id @default(autoincrement())
+  input_type_id Int
+  field_name    String      @db.VarChar(50)
+  field_label   String      @db.VarChar(100)
+  field_type    String?     @default("text") @db.VarChar(20)
+  placeholder   String?     @db.VarChar(200)
+  min_length    Int?        @default(1)
+  max_length    Int?        @default(255)
+  is_required   Boolean?    @default(true)
+  field_order   Int?        @default(1)
+  created_at    DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?   @default(now()) @db.Timestamp(6)
+  input_types   input_types @relation(fields: [input_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model input_types {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(100)
+  description       String?             @db.VarChar(255)
+  created_at        DateTime?           @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(6)
+  input_type_fields input_type_fields[]
+  products          products[]
+}
+
+model product_items {
+  id           Int       @id @default(autoincrement())
+  product_id   Int
+  name         String    @db.VarChar(200)
+  price        Decimal   @db.Decimal(12, 2)
+  stock        Int?      @default(0)
+  icon         String?
+  is_available Boolean?  @default(true)
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+  products     products  @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_product")
+  order_items  order_items[]
+}
+
+model products {
+  id            Int             @id @default(autoincrement())
+  category_id   Int
+  name          String          @db.VarChar(150)
+  image         String?         @db.VarChar(255)
+  description   String?
+  is_available  Boolean?        @default(true)
+  created_at    DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?       @default(now()) @db.Timestamp(6)
+  input_type_id Int?
+  product_items product_items[]
+  categories    categories      @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_category")
+  input_types   input_types?    @relation(fields: [input_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_input_type")
+  order_items   order_items[]
+}
+
+model user_db {
+  id         Int     @id(map: "user_pkey") @default(autoincrement())
+  fullName   String     @db.VarChar(10485760)
+  password   String     @db.VarChar(10485760)
+  email      String     @db.VarChar(10485760)
+  role       user_role? @default(buyer)
+  isVerified Boolean?   @default(false)
+
+  @@index([email], map: "idx_users_email")
+  @@index([role], map: "idx_users_role")
+  orders     orders[]
+}
+
+enum user_role {
+  admin
+  seller
+  buyer
+}
+
+enum order_status {
+  diproses
+  selesai
+  ditolak
+}
+
+model orders {
+  id             Int           @id @default(autoincrement())
+  invoice_code   String        @unique @db.VarChar(50)
+  user_id        Int?       // FK ke user_db (nullable untuk guest)
+  guest_email    String?       @db.VarChar(255)
+  total_price    Decimal       @db.Decimal(12, 2)
+  payment_method String?       @db.VarChar(50)
+  payment_proof  String?       @db.VarChar(255)
+  status         order_status  @default(diproses)
+  created_at     DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?     @default(now()) @db.Timestamp(6)
+  
+  // Relations
+  user_db        user_db?      @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  order_items    order_items[]
+}
+
+model order_items {
+  id              Int           @id @default(autoincrement())
+  order_id        Int
+  product_id      Int
+  product_item_id Int
+  quantity        Int           @default(1)
+  price           Decimal       @db.Decimal(12, 2)
+  input_data      Json?         // {"user_id": "123456", "server": "1234"}
+  created_at      DateTime?     @default(now()) @db.Timestamp(6)
+  
+  // Relations
+  orders          orders        @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  products        products      @relation(fields: [product_id], references: [id], onDelete: NoAction)
+  product_items   product_items @relation(fields: [product_item_id], references: [id], onDelete: NoAction)
+}

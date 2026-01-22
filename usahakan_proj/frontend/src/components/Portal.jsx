@@ -217,3 +217,4 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
 };
 
 export { Portal, PaymentPortal };
+

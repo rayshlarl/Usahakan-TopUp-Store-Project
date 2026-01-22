@@ -3,7 +3,7 @@ import {
   loadProductItems,
   getProductIdWithCategory,
   getInputFieldsByProductName,
-} from "../controllers/productController.js";
+} from "../controllers/product/index.js";
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.get("/:category/:productName", async (req, res) => {
       productName,
       category
     );
-    console.log(productValidationResult);
+    // console.log(productValidationResult);
 
     if (!productValidationResult.rows.length) {
       return res.json({

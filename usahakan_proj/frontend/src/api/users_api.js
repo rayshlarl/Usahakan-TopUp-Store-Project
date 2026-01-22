@@ -3,15 +3,14 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_API_URL;
 
 // --> Pasang ini di route yang butuh autenteikasi token JWT
+// const token = localStorage.getItem("token");
 // headers: {
 //     Authorization: `Bearer ${token}`;
 //   }
 
-//Get the dasboard data as categories & product
-const getDashboardData = async () => {
-  const token = localStorage.getItem("token");
+//Get the default data as categories, product & items
+const getDefaultData = async () => {
   const response = await axios.get(`${API_URL}`);
-
   return response.data;
 };
 
@@ -30,4 +29,22 @@ const sendUserData = async (email, password) => {
   return response.data;
 };
 
-export { getDashboardData, getProductItems, sendUserData };
+//Get the total items,product and category as count
+const getDahsboardData = async () => {
+  const response = await axios.get(`${API_URL}/dashboard`);
+  return response.data;
+};
+
+//Get the orders data
+const getOrdersData = async () => {
+  const response = await axios.get(`${API_URL}/orders`);
+  return response.data;
+};
+
+export {
+  getDefaultData,
+  getProductItems,
+  sendUserData,
+  getDahsboardData,
+  getOrdersData,
+};

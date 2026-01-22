@@ -1,6 +1,6 @@
 import express from "express";
 import { loadCategories } from "../controllers/categoryController.js";
-import { loadProducts } from "../controllers/productController.js";
+import { loadProducts } from "../controllers/product/index.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
