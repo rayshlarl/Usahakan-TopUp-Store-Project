@@ -18,6 +18,7 @@ router.get("/:category/:productName", async (req, res) => {
     );
     // console.log(productValidationResult);
 
+    //--> is there any product?
     if (!productValidationResult.rows.length) {
       return res.json({
         error: "Product or category not found",

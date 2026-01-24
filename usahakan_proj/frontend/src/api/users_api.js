@@ -41,10 +41,22 @@ const getOrdersData = async () => {
   return response.data;
 };
 
+//Get register Data
+const getRegisterData = async (fullName, email, password, passwordConfirm) => {
+  const response = await axios.post(`${API_URL}/register`, {
+    fullName,
+    email,
+    password,
+    passwordConfirm,
+  });
+  return response.data;
+};
+
 export {
   getDefaultData,
   getProductItems,
   sendUserData,
   getDahsboardData,
   getOrdersData,
+  getRegisterData,
 };

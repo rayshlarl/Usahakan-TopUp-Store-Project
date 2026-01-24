@@ -2,13 +2,57 @@ import { Header } from "../components/Header";
 import { useCart } from "../store/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { Portal, PaymentPortal } from "../components/Portal";
+import { PaymentPortal, SuccessPortal } from "../components/payment_portal";
+import { createOrder } from "../api/order_api";
 
 const Cart = () => {
   // --> Setup the statement
   const [showModal, setShowModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [invoiceCode, setInvoiceCode] = useState("");
   const { cart, clearCart, removeFromCart, cartSelected, newSelected } =
     useCart();
+
+  //--> Handle setup data
+  const handleConfirm = async (portalData) => {
+    // --> Get user data from localstorage
+    const savedUser = localStorage.getItem("user");
+    const user = savedUser ? JSON.parse(savedUser) : null;
+
+    // --> Generate invoice code
+    const invoice = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    // --> Rakit semua data untuk backend
+    const orderData = {
+      userId: user?.id || null,
+      guestEmail: user ? null : portalData.email,
+      totalPrice: totalPrice,
+      paymentMethod: "QRIS",
+      paymentProof: portalData.fileName || null,
+      invoice: invoice,
+      items: cartSelected.map((item) => ({
+        productId: item.id,
+        productItemId: item.productItemId,
+        quantity: 1,
+        price: item.price,
+        inputData: item.inputData,
+      })),
+    };
+
+    try {
+      const result = await createOrder(orderData);
+      console.log("Order created:", result);
+
+      // --> Sukses: clear cart, tutup modal, tampilkan success
+      clearCart();
+      setInvoiceCode(invoice);
+      setShowModal(false);
+      setShowSuccess(true);
+    } catch (err) {
+      console.error("Gagal buat order:", err);
+      alert("Gagal membuat pesanan, coba lagi kak!");
+    }
+  };
 
   const totalPrice = useMemo(() => {
     return cartSelected.reduce((sum, item) => sum + Number(item.price), 0);
@@ -34,6 +78,7 @@ const Cart = () => {
   }, []);
 
   const navigate = useNavigate();
+  console.log(cartSelected);
   return (
     <>
       <div className="min-h-screen flex flex-col bg-gray-100">
@@ -129,17 +174,20 @@ const Cart = () => {
                 </button>
               </div>
               {showModal && (
-                <Portal>
-                  <PaymentPortal
-                    cart={cartSelected}
-                    onClose={() => setShowModal(false)}
-                    onConfirm={() => {
-                      clearCart();
-                      setShowModal(false);
-                      alert("Pembayaran berhasil!");
-                    }}
-                  />
-                </Portal>
+                <PaymentPortal
+                  cart={cartSelected}
+                  onClose={() => setShowModal(false)}
+                  onConfirm={handleConfirm}
+                />
+              )}
+              {showSuccess && (
+                <SuccessPortal
+                  invoiceCode={invoiceCode}
+                  onClose={() => {
+                    setShowSuccess(false);
+                    navigate("/");
+                  }}
+                />
               )}
             </div>
           ) : (

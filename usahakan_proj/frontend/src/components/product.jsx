@@ -36,21 +36,15 @@ const Product = () => {
               .map((product) => (
                 <div
                   key={product.id}
-                  className="cursor-pointer bg-gray-300 rounded-3xl w-40 h-67 flex justify-center cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="overflow-hidden cursor-pointer bg-gray-300 rounded-2xl w-40 h-67 flex justify-center cursor-pointer hover:scale-105 transition-transform duration-200"
                   onClick={() => navigate(`/${cat.name}/${product.name}`)}
                 >
                   <div>
                     <img
-                      src={
-                        product.image ||
-                        "https://item4gamer.com/wp-content/uploads/2022/11/mobile-legends-1.webp"
-                      }
+                      src={`/poster/${product.image}`}
                       alt={product.name}
-                      className="w-35 rounded-3xl pt-2"
+                      className="w-[160px] h-[300px] mt-[-25px] object-cover object-top rounded-3xl"
                     />
-                    <div className="flex justify-center items-center pt-2">
-                      <p>{product.name}</p>
-                    </div>
                   </div>
                 </div>
               ))}

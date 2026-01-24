@@ -14,6 +14,12 @@ const registerValidation = [
     body("password")
         .isLength({ min: 6 })
         .withMessage("Password minimal 6 karakter"),
+    body("passwordConfirm").custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error("Konfirmasi password tidak cocok");
+        }
+        return true;
+    }),
 ];
 
 export { loginValidation, registerValidation };

@@ -3,6 +3,7 @@ import cors from "cors";
 import homeRoutes from "./routes/homeRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import registerRoutes from "./routes/registerRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
@@ -15,6 +16,7 @@ app.use(express.json());
 // Routes
 app.use("/", homeRoutes);
 app.use("/", authRoutes);
+app.use("/", registerRoutes);
 app.use("/", productRoutes);
 app.use("/", dashboardRoutes);
 app.use("/", orderRoutes);
