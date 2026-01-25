@@ -3,7 +3,6 @@ import express from "express";
 
 const router = express.Router();
 
-// GET /api/orders - Get all orders
 router.get("/orders", async (req, res) => {
   try {
     const response = await getOrder();
@@ -15,8 +14,7 @@ router.get("/orders", async (req, res) => {
   }
 });
 
-// POST /api/orders/create - Create a new order
-router.post("/create", async (req, res) => {
+router.post("/cart", async (req, res) => {
   try {
     const result = await createNewOrders(req.body);
     res.status(201).json(result);

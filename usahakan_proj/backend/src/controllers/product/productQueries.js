@@ -96,27 +96,10 @@ const getTotalProductSold = async () => {
   }
 };
 
-const getProductImage = async (productName) => {
-  try {
-    const result = await prisma.products.findFirst({
-      where: {
-        name: productName,
-      },
-      select: {
-        image: true,
-      },
-    });
-    return { rows: result };
-  } catch (err) {
-    console.error(err);
-  }
-};
-
 export {
   loadProducts,
   getProductId,
   getProductIdWithCategory,
   getTotalProduct,
   getTotalProductSold,
-  getProductImage,
 };

@@ -22,7 +22,6 @@ const getOrder = async () => {
   }
 };
 
-//-->create new orders when user submit order
 const createNewOrders = async (orderData) => {
   //--> setup data yang mau dikrim duls
   const {

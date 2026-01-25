@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { validationResult } from "express-validator";
 import { loginValidation } from "../utils/validator.js";
 import { getUserInformation } from "../controllers/userController.js";
@@ -20,11 +21,18 @@ router.post("/login", loginValidation, async (req, res) => {
 
   try {
     const { email, password } = req.body;
-    const isUserExist = await getUserInformation(email, password);
-    // console.log(isUserExist);
+
+    const encryptPassword = async (vanillaPassword) => {
+      const hashedPassword = await bcrypt.hash(vanillaPassword, 5);
+      return hashedPassword;
+    };
+    const newPassword = encryptPassword(password);
+
+    const isUserExist = await getUserInformation(email, newPassword);
+    // console.log(isUserExist.rows.length); --> Debug only
 
     //Cek apakah user yang dicari ada?
-    if (!isUserExist) {
+    if (isUserExist.rows.length === 0) {
       return res.status(401).json({
         success: false,
         message: "Email atau password salah",
