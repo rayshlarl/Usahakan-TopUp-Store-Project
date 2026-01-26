@@ -2,8 +2,8 @@ import { Header } from "../components/Header";
 import { useCart } from "../store/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { PaymentPortal, SuccessPortal } from "../components/payment_portal";
-import { createOrder } from "../api/order_api";
+import { PaymentPortal, SuccessPortal } from "../components/portal";
+import { createOrder } from "../api/users_api";
 
 const Cart = () => {
   // --> Setup the statement
@@ -13,37 +13,56 @@ const Cart = () => {
   const { cart, clearCart, removeFromCart, cartSelected, newSelected } =
     useCart();
 
-  //--> Handle setup data
+  // --> Delete cart handler
+  const handleDelete = () => {
+    const isConfirmToRemove = confirm("yakin mau dihapus?");
+    if (!isConfirmToRemove) return;
+    clearCart();
+  };
+
+  //-> Handle setup data
   const handleConfirm = async (portalData) => {
-    // --> Get user data from localstorage
     const savedUser = localStorage.getItem("user");
     const user = savedUser ? JSON.parse(savedUser) : null;
 
-    // --> Generate invoice code
-    const invoice = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    // --> Bikin invoice: INV-YYMMDD-HHMMSS
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mi = String(now.getMinutes()).padStart(2, "0");
+    const ss = String(now.getSeconds()).padStart(2, "0");
+    const invoice = `INV-${yy}${mm}${dd}-${hh}${mi}${ss}`;
 
-    // --> Rakit semua data untuk backend
+    // --> Rakit semua data backend
     const orderData = {
       userId: user?.id || null,
-      guestEmail: user ? null : portalData.email,
+      guestEmail: user ? user.email : portalData.email,
       totalPrice: totalPrice,
       paymentMethod: "QRIS",
       paymentProof: portalData.fileName || null,
       invoice: invoice,
       items: cartSelected.map((item) => ({
-        productId: item.id,
-        productItemId: item.productItemId,
+        productId: item.productId,
+        productItemId: item.id,
         quantity: 1,
         price: item.price,
         inputData: item.inputData,
       })),
     };
 
-    try {
-      const result = await createOrder(orderData);
-      console.log("Order created:", result);
+    // --> Buat FormData untuk upload file
+    const formData = new FormData();
+    formData.append("orderData", JSON.stringify(orderData));
+    if (portalData.file) {
+      formData.append("paymentProof", portalData.file);
+    }
 
-      // --> Sukses: clear cart, tutup modal, tampilkan success
+    //--> fetch data
+    try {
+      const result = await createOrder(formData);
+      localStorage.removeItem("cartSelected");
       clearCart();
       setInvoiceCode(invoice);
       setShowModal(false);
@@ -54,11 +73,13 @@ const Cart = () => {
     }
   };
 
+  // --> Total price
   const totalPrice = useMemo(() => {
     return cartSelected.reduce((sum, item) => sum + Number(item.price), 0);
   }, [cartSelected, cart]);
+  console.log(cartSelected);
 
-  // --> Function simpify (Ringkasan)
+  // --> cart grouping
   const groupedCart = cartSelected.reduce((accumulation, item) => {
     const groupKey = `${item.id}-${item.product}`;
 
@@ -78,13 +99,13 @@ const Cart = () => {
   }, []);
 
   const navigate = useNavigate();
-  console.log(cartSelected);
+
   return (
     <>
       <div className="min-h-screen flex flex-col bg-gray-100">
         <Header />
 
-        {/* Content */}
+        {/*                         -->  Content (panel kiri) <--                   */}
         <main className="flex-1 p-6 flex justify-center">
           {cart.length > 0 ? (
             <div className="w-full max-w-6xl flex gap-6">
@@ -130,7 +151,7 @@ const Cart = () => {
 
                 <div className="w-full flex justify-end">
                   <div
-                    onClick={() => clearCart()}
+                    onClick={handleDelete}
                     className="bg-red-500 px-20 py-3 rounded-2xl cursor-pointer"
                   >
                     <p className="text-white">Hapus semua</p>
@@ -138,7 +159,7 @@ const Cart = () => {
                 </div>
               </div>
 
-              {/* Right: Summary (35%) */}
+              {/*                           --> Right: Summary (35%) <--           */}
               <div className="w-[35%] bg-white rounded-xl shadow-md p-6 h-fit sticky top-30 mt-18">
                 <h2 className="text-xl font-bold mb-4">Ringkasan</h2>
 
@@ -180,15 +201,6 @@ const Cart = () => {
                   onConfirm={handleConfirm}
                 />
               )}
-              {showSuccess && (
-                <SuccessPortal
-                  invoiceCode={invoiceCode}
-                  onClose={() => {
-                    setShowSuccess(false);
-                    navigate("/");
-                  }}
-                />
-              )}
             </div>
           ) : (
             <div className="w-full h-fit mt-12 max-w-md bg-white rounded-2xl shadow-md p-10 flex flex-col items-center justify-center gap-4">
@@ -207,6 +219,16 @@ const Cart = () => {
           )}
         </main>
       </div>
+
+      {showSuccess && (
+        <SuccessPortal
+          invoiceCode={invoiceCode}
+          onClose={() => {
+            setShowSuccess(false);
+            navigate("/");
+          }}
+        />
+      )}
     </>
   );
 };

@@ -11,7 +11,6 @@ const SellerHeader = ({ user }) => {
     { name: "Dashboard", path: "/dashboard" },
     { name: "Produk", path: "/products" },
     { name: "Pesanan", path: "/orders" },
-    { name: "Laporan", path: "/reports" },
   ];
 
   const isActive = (path) => location.pathname === path;

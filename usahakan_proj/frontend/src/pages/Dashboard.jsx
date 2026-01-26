@@ -1,22 +1,36 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Widget } from "../components/widget";
 import { RecentOrders } from "../components/DashboardOrder";
 import { getDahsboardData } from "../api/users_api";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [dataValue, setDataValue] = useState([]);
+
   useEffect(() => {
+    // --> is user get the token?
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const response = await getDahsboardData();
         setDataValue(response);
       } catch (err) {
-        console.log("error woi");
+        console.log("error:", err);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }
       }
     };
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const widgetKey = ["kategori", "produk", "items", "terjual"];
 

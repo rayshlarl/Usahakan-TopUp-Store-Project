@@ -2,6 +2,10 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const getUploadUrl = (folder, filename) => {
+  return `${API_URL}/${folder}/${filename}`;
+};
+
 // --> Pasang ini di route yang butuh autenteikasi token JWT
 // const token = localStorage.getItem("token");
 // headers: {
@@ -31,7 +35,13 @@ const sendUserData = async (email, password) => {
 
 //Get the total items,product and category as count
 const getDahsboardData = async () => {
-  const response = await axios.get(`${API_URL}/dashboard`);
+  const token = localStorage.getItem("token");
+  const response = await axios.get(`${API_URL}/dashboard`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   return response.data;
 };
 
@@ -52,6 +62,43 @@ const getRegisterData = async (fullName, email, password, passwordConfirm) => {
   return response.data;
 };
 
+//Create a new order (with file upload)
+const createOrder = async (formData) => {
+  try {
+    const response = await axios.post(`${API_URL}/cart`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Error creating order:", err);
+    throw err;
+  }
+};
+
+//Update orders
+const updateOrder = async (invoiceCode, actions) => {
+  try {
+    const response = await axios.post(`${API_URL}/orders`, {
+      invoiceCode,
+      actions,
+    });
+    return response.data;
+  } catch (err) {
+    console.error("gagal updates :", err);
+    throw err;
+  }
+};
+
+// Products Management
+const getCategoryProduct = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/products`);
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export {
   getDefaultData,
   getProductItems,
@@ -59,4 +106,8 @@ export {
   getDahsboardData,
   getOrdersData,
   getRegisterData,
+  createOrder,
+  updateOrder,
+  getUploadUrl,
+  getCategoryProduct,
 };

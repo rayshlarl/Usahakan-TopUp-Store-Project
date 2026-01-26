@@ -6,6 +6,7 @@ import { RegisterPage } from "./pages/UserRegister";
 import { NotFoundHandler } from "./pages/404pages";
 import { Dashboard } from "./pages/Dashboard";
 import { OrderPages } from "./pages/Orders";
+import { ProductManagement } from "./pages/ProductManagement";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/products" element={<ProductManagement />} />
         <Route path="/orders" element={<OrderPages />} />
         <Route path="*" element={<NotFoundHandler />} />
       </Routes>

@@ -19,10 +19,11 @@ const CartProvider = ({ children }) => {
 
   const addToCart = (item) => {
     setCart((prev) => [...prev, item]);
-    console.log("cart added");
   };
 
   const removeFromCart = (indexToRemove) => {
+    const isConfirmToRemove = confirm("yakin mau dihapus?");
+    if (!isConfirmToRemove) return;
     setCartSelected((prevSelectedCart) =>
       prevSelectedCart
         .filter((item) => item.indexIn !== indexToRemove)
@@ -37,7 +38,10 @@ const CartProvider = ({ children }) => {
     );
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    setCartSelected([]);
+  };
 
   const newSelected = (index, item) => {
     setCartSelected((prev) => {

@@ -1,4 +1,4 @@
-import { Portal } from "./Portal";
+import { Portal } from "../Portal";
 
 const ProductPortal = ({ order, onClose }) => {
   if (!order) return null;

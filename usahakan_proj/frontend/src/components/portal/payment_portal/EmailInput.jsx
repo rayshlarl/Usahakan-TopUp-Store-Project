@@ -1,9 +1,8 @@
-const EmailInput = ({ isLoggedIn, userEmail, onEmailChange }) => {
+const EmailInput = ({ isLoggedIn, userEmail, onEmailChange, errorLabel }) => {
   return (
     <div>
-      <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
-        Email aktif
-      </p>
+      Email aktif{" "}
+      {errorLabel ? <span className="text-red-500">- {errorLabel}</span> : null}
       <input
         type="email"
         placeholder={isLoggedIn ? "" : "Masukkan email untuk notifikasi"}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Portal } from "../Portal";
-import { groupCartItems, groupCartByProduct } from "../../utils/cartHelpers";
+import { groupCartItems, groupCartByProduct } from "../../../utils/cartHelpers";
 import QrisSection from "./QrisSection";
 import PriceSummary from "./PriceSummary";
 import ProductItemList from "./ProductItemList";
@@ -10,31 +10,29 @@ import PaymentMethod from "./PaymentMethod";
 import UploadSection from "./UploadSection";
 
 const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
-  // --> Cek apakah user sudah login (pindah ke atas supaya bisa set initial email)
   const savedUser = localStorage.getItem("user");
   const user = savedUser ? JSON.parse(savedUser) : null;
   const isLoggedIn = !!user;
 
-  // --> Set email dari awal kalau user sudah login
   const [email, setEmail] = useState(isLoggedIn ? user.email : "");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const [fileError, setFileError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   if (!cart || cart.length === 0) {
     return null;
   }
 
-  // --> Calculate total price
   const totalPrice = cart.reduce((sum, item) => sum + Number(item.price), 0);
-
-  // --> State untuk nama file bukti pembayaran
-  const [selectedFileName, setSelectedFileName] = useState("");
-  const [fileError, setFileError] = useState("");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validasi ekstensi file
       const allowedExtensions = [".png", ".jpg", ".jpeg"];
       const fileName = file.name.toLowerCase();
+      setSelectedFile(file);
+      setSelectedFileName(file.name);
       const isValidFile = allowedExtensions.some((ext) =>
         fileName.endsWith(ext)
       );
@@ -53,7 +51,6 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
     }
   };
 
-  // --> Group cart items
   const groupedCart = groupCartItems(cart);
   const groupedByProduct = groupCartByProduct(cart);
 
@@ -91,6 +88,7 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
               isLoggedIn={isLoggedIn}
               userEmail={user?.email}
               onEmailChange={(e) => setEmail(e.target.value)}
+              errorLabel={emailError}
             />
             <PaymentMethod />
             <UploadSection
@@ -103,7 +101,17 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
             <button
-              onClick={() => onConfirm({ email })}
+              onClick={() => {
+                if (!email) {
+                  setEmailError("Email wajib diisi ya kak :)");
+                  return;
+                }
+                onConfirm({
+                  email,
+                  fileName: selectedFileName,
+                  file: selectedFile,
+                });
+              }}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer"
             >
               Konfirmasi pembayaran

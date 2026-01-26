@@ -1,13 +1,16 @@
 import { getOrdersData } from "../api/users_api";
 import { useState, useEffect } from "react";
 import { PhotoIcon, EyeIcon } from "@heroicons/react/24/solid";
-import ProductPortal from "./ProductPortal";
+import { ProductPortal, ImagePortal, AcceptionPortal } from "./portal";
 
 const RecentOrders = () => {
   const [order, setOrder] = useState([]);
   const [showProductPortal, setShowProductPortal] = useState(false);
+  const [showImagePortal, setShowImagePortal] = useState(false);
+  const [showAccPortal, setShowAccPortal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // --> Product Portal
   const handleOpenProductPortal = (orderData) => {
     setSelectedOrder(orderData);
     setShowProductPortal(true);
@@ -16,6 +19,28 @@ const RecentOrders = () => {
   const handleCloseProductPortal = () => {
     setShowProductPortal(false);
     setSelectedOrder(null);
+  };
+
+  //--> Image Portal
+  const handleOpenImagePortal = (orderData) => {
+    setSelectedOrder(orderData.payment_proof);
+    setShowImagePortal(true);
+  };
+
+  const handleCloseImagePortal = () => {
+    setSelectedOrder(null);
+    setShowImagePortal(false);
+  };
+
+  //--> Acception Portal
+  const handleOpenAccPortal = (orderData) => {
+    setSelectedOrder(orderData);
+    setShowAccPortal(true);
+  };
+
+  const handleCloseAccPortal = () => {
+    setSelectedOrder(null);
+    setShowAccPortal(false);
   };
 
   useEffect(() => {
@@ -32,12 +57,12 @@ const RecentOrders = () => {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case "Selesai":
-        return "bg-emerald-500 text-white";
-      case "Diproses":
+      case "selesai":
+        return "bg-green-500 text-white";
+      case "diproses":
         return "bg-gray-100 text-gray-600 border border-gray-300";
-      case "Ditolak":
-        return "bg-red-100 text-red-500 border border-red-300";
+      case "ditolak":
+        return "bg-red-200 text-red-500 border border-red-300";
       default:
         return "bg-gray-100 text-gray-600";
     }
@@ -102,7 +127,10 @@ const RecentOrders = () => {
                 </button>
               </td>
               <td className="py-5">
-                <button className="flex items-center gap-1 text-gray-500 hover:text-gray-700 cursor-pointer">
+                <button
+                  onClick={() => handleOpenImagePortal(order)}
+                  className="flex items-center gap-1 text-gray-500 hover:text-gray-700 cursor-pointer"
+                >
                   <PhotoIcon className="w-5" />
                   <span className="text-xs">
                     See
@@ -112,10 +140,11 @@ const RecentOrders = () => {
                 </button>
               </td>
               <td className="py-5">
-                <button className="cursor-pointer px-4 py-2 bg-emerald-500 text-white text-xs rounded-lg hover:bg-emerald-600">
-                  Click
-                  <br />
-                  here
+                <button
+                  onClick={() => handleOpenAccPortal(order)}
+                  className="cursor-pointer px-4 py-2 bg-emerald-500 text-white text-xs rounded-lg hover:bg-emerald-600"
+                >
+                  Proses
                 </button>
               </td>
             </tr>
@@ -129,6 +158,17 @@ const RecentOrders = () => {
           order={selectedOrder}
           onClose={handleCloseProductPortal}
         />
+      )}
+      {/* Image Portal */}
+      {showImagePortal && (
+        <ImagePortal
+          orderImage={selectedOrder}
+          onClose={handleCloseImagePortal}
+        />
+      )}
+      {/* Acception Portal */}
+      {showAccPortal && (
+        <AcceptionPortal order={selectedOrder} onClose={handleCloseAccPortal} />
       )}
     </div>
   );

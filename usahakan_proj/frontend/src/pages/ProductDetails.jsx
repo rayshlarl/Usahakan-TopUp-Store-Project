@@ -67,6 +67,20 @@ const ProductDetails = () => {
       }
     }
 
+    //--> validasi nomor telpon ( FE only )
+    const validatePhone = (phone) => {
+      const regex = /^08[0-9]{8,11}$/;
+      return regex.test(phone);
+    };
+    const phoneField = inputFields.find((f) => f.field_name === "phoneNumber");
+    if (phoneField) {
+      const phoneValue = inputData.phoneNumber || "";
+      if (phoneValue && !validatePhone(phoneValue)) {
+        newErrors.phoneNumber =
+          "Format nomor tidak valid (contoh: 081234567890)";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,7 +90,8 @@ const ProductDetails = () => {
     if (!validateInputs()) return;
 
     addToCart({
-      id: item.id,
+      id: item.id, // product_item_id
+      productId: item.product_id, // product_id (FK ke products)
       name: item.name,
       product: id,
       category: category,
