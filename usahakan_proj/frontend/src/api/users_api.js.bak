@@ -99,6 +99,18 @@ const getCategoryProduct = async () => {
   }
 };
 
+//get product items by name (params) -> id -> items by p.id
+const getItemByProductName = async (productName) => {
+  try {
+    const response = await axios.post(`${API_URL}/products/${productName}`, {
+      productName,
+    });
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export {
   getDefaultData,
   getProductItems,
@@ -110,4 +122,5 @@ export {
   updateOrder,
   getUploadUrl,
   getCategoryProduct,
+  getItemByProductName,
 };

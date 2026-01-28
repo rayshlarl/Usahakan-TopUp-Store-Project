@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Portal } from "../Portal";
 import { groupCartItems, groupCartByProduct } from "../../../utils/cartHelpers";
+import { useFileValidation } from "../../../hooks/useFileValidation";
 import QrisSection from "./QrisSection";
 import PriceSummary from "./PriceSummary";
 import ProductItemList from "./ProductItemList";
@@ -14,45 +15,38 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
   const user = savedUser ? JSON.parse(savedUser) : null;
   const isLoggedIn = !!user;
 
+  // Local State
   const [email, setEmail] = useState(isLoggedIn ? user.email : "");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedFileName, setSelectedFileName] = useState("");
-  const [fileError, setFileError] = useState("");
   const [emailError, setEmailError] = useState("");
 
-  if (!cart || cart.length === 0) {
-    return null;
-  }
+  // Custom Hooks
+  const {
+    selectedFile,
+    fileName,
+    error: fileError,
+    validateFile,
+  } = useFileValidation();
 
+  // Guard Clause
+  if (!cart || cart.length === 0) return null;
+
+  // Computed Values
   const totalPrice = cart.reduce((sum, item) => sum + Number(item.price), 0);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const allowedExtensions = [".png", ".jpg", ".jpeg"];
-      const fileName = file.name.toLowerCase();
-      setSelectedFile(file);
-      setSelectedFileName(file.name);
-      const isValidFile = allowedExtensions.some((ext) =>
-        fileName.endsWith(ext)
-      );
-
-      if (!isValidFile) {
-        setFileError("Hanya file PNG, JPG, atau JPEG yang diperbolehkan kak!");
-        e.target.value = "";
-        setSelectedFileName("");
-        return;
-      }
-
-      setFileError("");
-      setSelectedFileName(file.name);
-    } else {
-      setSelectedFileName("");
-    }
-  };
-
   const groupedCart = groupCartItems(cart);
   const groupedByProduct = groupCartByProduct(cart);
+
+  // Handlers
+  const handleConfirm = () => {
+    if (!email) {
+      setEmailError("Email wajib diisi ya kak :)");
+      return;
+    }
+    onConfirm({
+      email,
+      fileName,
+      file: selectedFile,
+    });
+  };
 
   return (
     <Portal>
@@ -65,11 +59,11 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
+          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
             <h2 className="text-xl font-bold text-gray-800">Detail Pesanan</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl font-light cursor-pointer"
+              className="text-gray-400 hover:text-gray-600 text-2xl font-light cursor-pointer transition"
             >
               ×
             </button>
@@ -91,28 +85,24 @@ const PaymentPortal = ({ cart = [], onClose, onConfirm }) => {
               errorLabel={emailError}
             />
             <PaymentMethod />
-            <UploadSection
-              fileError={fileError}
-              selectedFileName={selectedFileName}
-              onFileChange={handleFileChange}
-            />
+
+            <div>
+              <p className="text-sm text-gray-500 mb-3">
+                *opsional, demi kenyamanan yuk upload bukti pembayaran :)
+              </p>
+              <UploadSection
+                fileError={fileError}
+                selectedFileName={fileName}
+                onFileChange={validateFile}
+              />
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 sticky bottom-0">
             <button
-              onClick={() => {
-                if (!email) {
-                  setEmailError("Email wajib diisi ya kak :)");
-                  return;
-                }
-                onConfirm({
-                  email,
-                  fileName: selectedFileName,
-                  file: selectedFile,
-                });
-              }}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer"
+              onClick={handleConfirm}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors cursor-pointer shadow-lg shadow-blue-500/30"
             >
               Konfirmasi pembayaran
             </button>

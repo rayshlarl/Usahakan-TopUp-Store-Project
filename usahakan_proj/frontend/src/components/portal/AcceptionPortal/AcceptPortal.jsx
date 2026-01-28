@@ -1,5 +1,5 @@
 import { Portal } from "../Portal";
-import { updateOrder } from "../../../api/users_api";
+import { updateOrder } from "../../../api";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
 

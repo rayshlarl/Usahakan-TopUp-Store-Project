@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FloatingInput } from "../components/FloatingInput";
 import LoginBg from "../assets/loginbg.png";
-import { getRegisterData } from "../api/users_api";
+import { getRegisterData } from "../api";
 
 const RegisterPage = () => {
   const navigate = useNavigate();

@@ -6,12 +6,17 @@ import {
   TrashIcon,
   CubeTransparentIcon,
 } from "@heroicons/react/24/solid";
-import { getCategoryProduct } from "../api/users_api";
+import { getCategoryProduct } from "../api";
+import { useNavigate } from "react-router-dom";
 
 // Product Card Component
 const ProductCard = ({ product, onEdit, onDelete }) => {
+  const navigate = useNavigate();
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex gap-4 hover:shadow-md transition-shadow">
+    <div
+      onClick={() => navigate(`/products/${product.name}`)}
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
+    >
       {/* Product Image */}
       <img
         src={product.image}
@@ -32,14 +37,20 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
         {/* Action Buttons */}
         <div className="flex gap-2 mt-3">
           <button
-            onClick={() => onDelete(product.id)}
+            onClick={(e) => {
+              onDelete(product.id);
+              e.stopPropagation();
+            }}
             className="flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 cursor-pointer"
           >
             <TrashIcon className="w-4 h-4" />
             <span className="text-sm">Hapus</span>
           </button>
           <button
-            onClick={() => onEdit(product.id)}
+            onClick={(e) => {
+              onEdit(product.id);
+              e.stopPropagation();
+            }}
             className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
           >
             <PencilIcon className="w-4 h-4" />
@@ -76,7 +87,6 @@ const ProductManagement = () => {
 
   //fetch the categories - products
   useEffect(() => {
-    console.log("test");
     const fetchData = async () => {
       try {
         const dataRespon = await getCategoryProduct();

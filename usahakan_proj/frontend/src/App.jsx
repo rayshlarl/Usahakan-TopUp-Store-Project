@@ -7,6 +7,7 @@ import { NotFoundHandler } from "./pages/404pages";
 import { Dashboard } from "./pages/Dashboard";
 import { OrderPages } from "./pages/Orders";
 import { ProductManagement } from "./pages/ProductManagement";
+import { ItemManagement } from "./pages/itemManagement";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const App = () => {
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/products" element={<ProductManagement />} />
         <Route path="/orders" element={<OrderPages />} />
+        <Route path="/products/:productName" element={<ItemManagement />} />
         <Route path="*" element={<NotFoundHandler />} />
       </Routes>
     </Router>

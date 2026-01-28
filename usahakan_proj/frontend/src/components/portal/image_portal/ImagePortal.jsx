@@ -1,5 +1,5 @@
 import { Portal } from "../Portal";
-import { getUploadUrl } from "../../../api/users_api";
+import { getUploadUrl } from "../../../api";
 
 const ImagePortal = ({ orderImage, onClose }) => {
   return (
@@ -9,7 +9,7 @@ const ImagePortal = ({ orderImage, onClose }) => {
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
+          className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full flex justify-center flex-col "
           onClick={(e) => e.stopPropagation()}
         >
           {/* konten di sini */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FloatingInput } from "../components/FloatingInput";
 import LoginBg from "../assets/loginbg.png";
-import { sendUserData } from "../api/users_api";
+import { sendUserData } from "../api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -40,8 +40,8 @@ const LoginPage = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          err.response?.data?.errors[0]?.msg ||
-          "Login gagal, coba lagi"
+        err.response?.data?.errors[0]?.msg ||
+        "Login gagal, coba lagi"
       );
     } finally {
       setLoading(false);

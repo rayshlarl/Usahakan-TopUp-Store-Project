@@ -1,6 +1,6 @@
 import { Header } from "../components/Header";
 import { DynamicInputForm } from "../components/DynamicInputForm";
-import { getProductItems } from "../api/users_api";
+import { getProductItems } from "../api";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../store/CartContext";

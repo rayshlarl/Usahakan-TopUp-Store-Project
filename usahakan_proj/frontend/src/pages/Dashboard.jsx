@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Widget } from "../components/widget";
 import { RecentOrders } from "../components/DashboardOrder";
-import { getDahsboardData } from "../api/users_api";
+import { getDahsboardData } from "../api";
 
 const Dashboard = () => {
   const navigate = useNavigate();

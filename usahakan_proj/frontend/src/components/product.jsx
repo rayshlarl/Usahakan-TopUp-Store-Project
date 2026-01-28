@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getDefaultData } from "../api/users_api";
+import { getDefaultData } from "../api";
 
 const Product = () => {
   const [products, setProducts] = useState([]);

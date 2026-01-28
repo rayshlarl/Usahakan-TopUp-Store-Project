@@ -3,222 +3,113 @@ import { useCart } from "../store/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { PaymentPortal, SuccessPortal } from "../components/portal";
-import { createOrder } from "../api/users_api";
+import { useOrderAction } from "../hooks/useOrderAction";
+import { groupCartItems } from "../utils/cartHelpers";
+import { CartItemList } from "../components/cart/CartItemList";
+import { CartSummary } from "../components/cart/CartSummary";
 
 const Cart = () => {
-  // --> Setup the statement
+  const { cart, clearCart, removeFromCart, cartSelected, newSelected } = useCart();
+  const navigate = useNavigate();
+
+  // Dialog States
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [invoiceCode, setInvoiceCode] = useState("");
-  const { cart, clearCart, removeFromCart, cartSelected, newSelected } =
-    useCart();
 
-  // --> Delete cart handler
-  const handleDelete = () => {
-    const isConfirmToRemove = confirm("yakin mau dihapus?");
-    if (!isConfirmToRemove) return;
-    clearCart();
+  // Custom Hooks
+  const { submitOrder } = useOrderAction(clearCart);
+
+  // Computed Values
+  const totalPrice = useMemo(() => {
+    return cartSelected.reduce((sum, item) => sum + Number(item.price), 0);
+  }, [cartSelected]);
+
+  const groupedCart = useMemo(() => groupCartItems(cartSelected), [cartSelected]);
+
+  // Handlers
+  const handleDeleteAll = () => {
+    const isConfirmToRemove = confirm("Yakin mau dihapus semua?");
+    if (isConfirmToRemove) clearCart();
   };
 
-  //-> Handle setup data
-  const handleConfirm = async (portalData) => {
+  const handleConfirmOrder = async (portalData) => {
     const savedUser = localStorage.getItem("user");
     const user = savedUser ? JSON.parse(savedUser) : null;
 
-    // --> Bikin invoice: INV-YYMMDD-HHMMSS
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
-    const hh = String(now.getHours()).padStart(2, "0");
-    const mi = String(now.getMinutes()).padStart(2, "0");
-    const ss = String(now.getSeconds()).padStart(2, "0");
-    const invoice = `INV-${yy}${mm}${dd}-${hh}${mi}${ss}`;
-
-    // --> Rakit semua data backend
-    const orderData = {
-      userId: user?.id || null,
-      guestEmail: user ? user.email : portalData.email,
-      totalPrice: totalPrice,
-      paymentMethod: "QRIS",
-      paymentProof: portalData.fileName || null,
-      invoice: invoice,
-      items: cartSelected.map((item) => ({
-        productId: item.productId,
-        productItemId: item.id,
-        quantity: 1,
-        price: item.price,
-        inputData: item.inputData,
-      })),
-    };
-
-    // --> Buat FormData untuk upload file
-    const formData = new FormData();
-    formData.append("orderData", JSON.stringify(orderData));
-    if (portalData.file) {
-      formData.append("paymentProof", portalData.file);
-    }
-
-    //--> fetch data
     try {
-      const result = await createOrder(formData);
-      localStorage.removeItem("cartSelected");
-      clearCart();
+      const invoice = await submitOrder(
+        portalData,
+        cartSelected,
+        totalPrice,
+        user
+      );
       setInvoiceCode(invoice);
       setShowModal(false);
       setShowSuccess(true);
     } catch (err) {
-      console.error("Gagal buat order:", err);
       alert("Gagal membuat pesanan, coba lagi kak!");
     }
   };
 
-  // --> Total price
-  const totalPrice = useMemo(() => {
-    return cartSelected.reduce((sum, item) => sum + Number(item.price), 0);
-  }, [cartSelected, cart]);
-  console.log(cartSelected);
+  // Empty Cart View
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-100">
+        <Header />
+        <main className="flex-1 p-6 flex justify-center items-center">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-10 flex flex-col items-center justify-center gap-4">
+            <i className="fa-solid fa-cart-shopping text-6xl text-gray-300"></i>
+            <h1 className="font-bold text-xl">Belum ada produk!</h1>
+            <p className="text-gray-500 text-center">
+              Keranjang belanja kamu masih kosong
+            </p>
+            <button
+              onClick={() => navigate(`/`)}
+              className="bg-blue-500 py-3 px-10 rounded-2xl cursor-pointer hover:bg-blue-600 transition"
+            >
+              <p className="font-bold text-white">Mulai belanja</p>
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-  // --> cart grouping
-  const groupedCart = cartSelected.reduce((accumulation, item) => {
-    const groupKey = `${item.id}-${item.product}`;
-
-    const existingItem = accumulation.find((i) => i.groupKey === groupKey);
-    if (existingItem) {
-      existingItem.qty += 1;
-      existingItem.totalPrice += Number(item.price);
-    } else {
-      accumulation.push({
-        ...item,
-        groupKey: groupKey,
-        qty: 1,
-        totalPrice: Number(item.price),
-      });
-    }
-    return accumulation;
-  }, []);
-
-  const navigate = useNavigate();
-
+  // Main Cart View
   return (
     <>
       <div className="min-h-screen flex flex-col bg-gray-100">
         <Header />
 
-        {/*                         -->  Content (panel kiri) <--                   */}
         <main className="flex-1 p-6 flex justify-center">
-          {cart.length > 0 ? (
-            <div className="w-full max-w-6xl flex gap-6">
-              {/* Left: Cart Items (65%) */}
-              <div className="w-[65%] rounded-xl p-6">
-                <h2 className="text-xl font-bold mb-4">Keranjang</h2>
+          <div className="w-full max-w-6xl flex gap-6">
+            {/* Left: Item List */}
+            <CartItemList
+              cart={cart}
+              selected={cartSelected}
+              onRemove={removeFromCart}
+              onSelect={newSelected}
+              onDeleteAll={handleDeleteAll}
+            />
 
-                {cart.map((cartItem, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-2xl flex items-center justify-between p-4 my-5"
-                  >
-                    <div className="ml-3">
-                      <input
-                        type="checkbox"
-                        className="scale-150"
-                        checked={cartSelected.some(
-                          (item) => item.indexIn === index
-                        )}
-                        onChange={() => newSelected(index, cartItem)}
-                      />
-                    </div>
-                    <div className="flex items-center gap-4 mr-60">
-                      <img src="..." className="w-16 h-16 rounded-lg" />
-                      <div>
-                        <p className="font-semibold">{cartItem.name}</p>
-                        <p className="text-gray-500 text-sm">{cartItem.game}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <p className="font-bold text-red-500">
-                        Rp. {cartItem.price}
-                      </p>
-                      <button
-                        onClick={() => removeFromCart(index)}
-                        className="text-gray-400 hover:text-red-500 cursor-pointer"
-                      >
-                        <i className="fa-solid fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                <div className="w-full flex justify-end">
-                  <div
-                    onClick={handleDelete}
-                    className="bg-red-500 px-20 py-3 rounded-2xl cursor-pointer"
-                  >
-                    <p className="text-white">Hapus semua</p>
-                  </div>
-                </div>
-              </div>
-
-              {/*                           --> Right: Summary (35%) <--           */}
-              <div className="w-[35%] bg-white rounded-xl shadow-md p-6 h-fit sticky top-30 mt-18">
-                <h2 className="text-xl font-bold mb-4">Ringkasan</h2>
-
-                <div className="bg-gray-100 p-3 rounded-xl mb-5 py-5">
-                  {groupedCart.map((item, index) => (
-                    <div key={index} className="flex justify-between mb-2">
-                      <span className="text-gray-500">
-                        {item.name}{" "}
-                        {item.qty > 0 && (
-                          <span className="text-blue-500">x{item.qty}</span>
-                        )}
-                      </span>
-
-                      <span className="text-gray-500">
-                        Rp. {Number(item.totalPrice).toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-between mb-6 bg-gray-100 px-5 py-3 rounded-xl">
-                  <span className="font-bold">Total</span>
-                  <span className="font-bold text-blue-500 text-xl">
-                    Rp. {totalPrice.toLocaleString()}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition cursor-pointer"
-                >
-                  Checkout
-                </button>
-              </div>
-              {showModal && (
-                <PaymentPortal
-                  cart={cartSelected}
-                  onClose={() => setShowModal(false)}
-                  onConfirm={handleConfirm}
-                />
-              )}
-            </div>
-          ) : (
-            <div className="w-full h-fit mt-12 max-w-md bg-white rounded-2xl shadow-md p-10 flex flex-col items-center justify-center gap-4">
-              <i className="fa-solid fa-cart-shopping text-6xl text-gray-300"></i>
-              <h1 className="font-bold text-xl">Belum ada produk!</h1>
-              <p className="text-gray-500 text-center">
-                Keranjang belanja kamu masih kosong
-              </p>
-              <button
-                onClick={() => navigate(`/`)}
-                className="bg-blue-500 py-3 px-10 rounded-2xl cursor-pointer hover:bg-blue-600 transition"
-              >
-                <p className="font-bold text-white">Mulai belanja</p>
-              </button>
-            </div>
-          )}
+            {/* Right: Summary */}
+            <CartSummary
+              groupedItems={groupedCart}
+              totalPrice={totalPrice}
+              onCheckout={() => setShowModal(true)}
+            />
+          </div>
         </main>
       </div>
+
+      {showModal && (
+        <PaymentPortal
+          cart={cartSelected}
+          onClose={() => setShowModal(false)}
+          onConfirm={handleConfirmOrder}
+        />
+      )}
 
       {showSuccess && (
         <SuccessPortal
@@ -232,4 +123,5 @@ const Cart = () => {
     </>
   );
 };
+
 export { Cart };

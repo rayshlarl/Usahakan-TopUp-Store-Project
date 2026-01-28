@@ -1,4 +1,4 @@
-import { getOrdersData } from "../api/users_api";
+import { getOrdersData } from "../api";
 import { useState, useEffect } from "react";
 import { PhotoIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { ProductPortal, ImagePortal, AcceptionPortal } from "./portal";
