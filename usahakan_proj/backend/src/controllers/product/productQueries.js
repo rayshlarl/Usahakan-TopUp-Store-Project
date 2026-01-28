@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 
-// Get all products with category name
+// Get all products with category - name
 const loadProducts = async () => {
   try {
     const result = await prisma.products.findMany({
@@ -37,7 +37,7 @@ const getProductId = async (name) => {
   }
 };
 
-// Get product with category validation
+// Get product with category params ( --> buat validasi params )
 const getProductIdWithCategory = async (productName, categoryName) => {
   try {
     const result = await prisma.products.findFirst({

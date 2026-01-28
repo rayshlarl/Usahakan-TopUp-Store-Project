@@ -69,4 +69,21 @@ const createNewOrders = async (orderData) => {
   }
 };
 
-export { getOrder, createNewOrders };
+// --> update orders
+const updateOrders = async (invoiceCode, actions) => {
+  console.log(invoiceCode);
+  console.log(actions);
+  try {
+    const result = await prisma.orders.update({
+      where: { invoice_code: invoiceCode },
+      data: {
+        status: actions,
+      },
+    });
+    return { success: true, order: result };
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export { getOrder, createNewOrders, updateOrders };

@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  loadProductItems,
+  loadProductItemsById,
   getProductIdWithCategory,
   getInputFieldsByProductName,
 } from "../controllers/product/index.js";
@@ -28,7 +28,7 @@ router.get("/:category/:productName", async (req, res) => {
     }
 
     const productId = productValidationResult.rows[0].id;
-    const productItems = await loadProductItems(productId);
+    const productItems = await loadProductItemsById(productId);
 
     // Get the form format based on product name
     const inputFields = await getInputFieldsByProductName(productName);

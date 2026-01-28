@@ -1,5 +1,4 @@
 import express from "express";
-import { loadCategories } from "../controllers/categoryController.js";
 import { loadProducts } from "../controllers/product/index.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -11,12 +10,10 @@ const router = express.Router();
 // Homepage - show the categories and products
 router.get("/", async (req, res) => {
   try {
-    const categories = await loadCategories();
-    const products = await loadProducts();
+    const result = await loadProducts();
 
-    res.json({
-      categoryData: categories.rows,
-      productsData: products.rows,
+    return res.status(201).json({
+      result,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

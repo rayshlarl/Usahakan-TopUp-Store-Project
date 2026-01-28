@@ -10,18 +10,18 @@ const loadUsers = async () => {
   }
 };
 
-// Get user by email and password (for login)
-const getUserInformation = async (email, password) => {
+// --> Get user by email
+const getUserInformation = async (email) => {
   try {
     const result = await prisma.user_db.findFirst({
       where: {
         email: email,
-        password: password,
       },
     });
-    return { rows: result ? [result] : [] };
+    return result;
   } catch (err) {
     console.error(err);
+    return null;
   }
 };
 //--> create new user

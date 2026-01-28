@@ -22,27 +22,26 @@ router.post("/login", loginValidation, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const encryptPassword = async (vanillaPassword) => {
-      const hashedPassword = await bcrypt.hash(vanillaPassword, 5);
-      return hashedPassword;
-    };
-    const newPassword = encryptPassword(password);
+    const user = await getUserInformation(email);
 
-    const isUserExist = await getUserInformation(email, newPassword);
-    // console.log(isUserExist.rows.length); --> Debug only
-
-    //Cek apakah user yang dicari ada?
-    if (isUserExist.rows.length === 0) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: "Email atau password salah",
       });
     }
 
-    const user = isUserExist.rows[0];
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Email atau password salah",
+      });
+    }
+
     let token = null;
     if (user.role !== "buyer") {
-      // Create jwt token
       token = jwt.sign(
         {
           id: user.id,

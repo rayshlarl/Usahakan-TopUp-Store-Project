@@ -5,10 +5,11 @@ import {
   getTotalItems,
   getTotalProductSold,
 } from "../controllers/product/index.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/dashboard", async (req, res) => {
+router.get("/dashboard", authenticateToken, async (req, res) => {
   try {
     const categoryResult = await getTotalCategory();
     const productResult = await getTotalProduct();
