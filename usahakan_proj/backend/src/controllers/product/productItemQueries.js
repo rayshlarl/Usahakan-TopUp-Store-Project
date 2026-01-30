@@ -15,15 +15,12 @@ const loadProductItemsById = async (productId) => {
           },
         },
       },
+      orderBy: {
+        id: "asc",
+      },
     });
 
-    const rows = result.map((pi) => ({
-      ...pi,
-      product_name: pi.products.name,
-      product_image: pi.products.image,
-    }));
-
-    return { rows };
+    return { rows: result };
   } catch (err) {
     console.error(err);
   }
@@ -76,4 +73,35 @@ const createItem = async (itemData, productId) => {
   }
 };
 
-export { loadProductItemsById, getTotalItems, deleteItemById, createItem };
+// Update Item
+const updateItem = async (itemId, itemData) => {
+  try {
+    const result = await prisma.product_items.update({
+      where: {
+        id: parseInt(itemId),
+      },
+      data: {
+        name: itemData.name,
+        price: parseFloat(itemData.price),
+        stock: itemData.isUnlimitedStock ? null : parseInt(itemData.stock),
+        is_unlimited_stock:
+          itemData.isUnlimitedStock === "true" ||
+          itemData.isUnlimitedStock === true,
+        is_available:
+          itemData.isAvailable === "true" || itemData.isAvailable === true,
+        icon: itemData.icon || null,
+      },
+    });
+    return result;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export {
+  loadProductItemsById,
+  getTotalItems,
+  deleteItemById,
+  createItem,
+  updateItem,
+};

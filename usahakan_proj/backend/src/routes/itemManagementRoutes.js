@@ -1,5 +1,5 @@
 import express from "express";
-import { getProductId } from "../controllers/product/index.js";
+import { getProductId, updateItem } from "../controllers/product/index.js";
 import {
   loadProductItemsById,
   deleteItemById,
@@ -21,6 +21,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// --> Create item
 router.post("/products/item", upload.single("icon"), async (req, res) => {
   try {
     const itemData = JSON.parse(req.body.itemData);
@@ -41,9 +42,9 @@ router.post("/products/item", upload.single("icon"), async (req, res) => {
   }
 });
 
+/// --> Get item
 router.post("/products/:productName", async (req, res) => {
   const { productName } = req.body;
-  // console.log(productName);
   try {
     const productId = await getProductId(productName);
     const productItems = await loadProductItemsById(productId.rows[0].id);
@@ -66,5 +67,27 @@ router.delete("/products/item/:itemId", async (req, res) => {
     console.error(err);
   }
 });
+
+// --> Update item
+router.put(
+  "/products/updateItem/:itemId",
+  upload.single("icon"),
+  async (req, res) => {
+    try {
+      const { itemId } = req.params;
+      const itemData = JSON.parse(req.body.itemData);
+      const iconFile = req.file;
+
+      //--> ganti nama file "kalo" ada
+      const iconName = iconFile ? iconFile.filename : itemData.icon;
+
+      const result = await updateItem(itemId, { ...itemData, icon: iconName });
+
+      res.status(200).json({ success: true, data: result });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+);
 
 export default router;

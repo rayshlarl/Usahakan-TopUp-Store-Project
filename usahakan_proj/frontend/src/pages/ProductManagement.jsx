@@ -6,8 +6,11 @@ import {
   TrashIcon,
   CubeTransparentIcon,
 } from "@heroicons/react/24/solid";
-import { getCategoryProduct } from "../api";
+import { createProduct, loadProductsAndCategory } from "../api";
+import { getInputTypes } from "../api";
 import { useNavigate } from "react-router-dom";
+import { AddProductPortal } from "../components/portal/AddProductPortal/addProduct";
+import { createPortal } from "react-dom";
 
 // Product Card Component
 const ProductCard = ({ product, onEdit, onDelete }) => {
@@ -65,17 +68,33 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
 // Main Component
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
+  const [inputStyle, setInputStyle] = useState([]);
+  const [showAddProductPortal, setShowAddProductPortal] = useState(false);
 
   // Handler untuk tambah produk
-  const handleAddProduct = () => {
-    console.log("Tambah produk");
-    // TODO: Implement add product modal/page
+  const handleOpenAddProduct = () => {
+    setShowAddProductPortal(true);
+  };
+
+  // Handler Close add produk
+  const handleCloseAddProduct = () => {
+    setShowAddProductPortal(false);
+  };
+
+  // Submit add product handler
+  const submitAddProduct = async (productData) => {
+    const result = await createProduct(productData);
   };
 
   // Handler untuk edit produk
   const handleEditProduct = (productId) => {
     console.log("Edit produk:", productId);
     // TODO: Implement edit product modal/page
+  };
+
+  // Submit edit product handler
+  const submitEditproduct = () => {
+    console.log("Jalan wok");
   };
 
   // Handler untuk hapus produk
@@ -85,12 +104,13 @@ const ProductManagement = () => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
   };
 
-  //fetch the categories - products
+  //fetch the input types, categories - products
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dataRespon = await getCategoryProduct();
-        // console.log(dataRespon.result.rows);
+        const dataRespon = await loadProductsAndCategory();
+        const inputTypesResponse = await getInputTypes();
+        setInputStyle(inputTypesResponse.data);
         setProducts(dataRespon.result.rows);
       } catch (err) {
         console.error(err);
@@ -108,7 +128,7 @@ const ProductManagement = () => {
     acc[category].push(product);
     return acc;
   }, {});
-
+  // console.log(groupedProducts);
   return (
     <>
       <Header />
@@ -123,7 +143,7 @@ const ProductManagement = () => {
               <p className="text-gray-500">Kelola produk digital Anda.</p>
             </div>
             <button
-              onClick={handleAddProduct}
+              onClick={handleOpenAddProduct}
               className="flex items-center gap-2 bg-blue-500 text-white px-5 py-3 rounded-xl hover:bg-blue-600 cursor-pointer"
             >
               <PlusIcon className="w-5 h-5" />
@@ -167,7 +187,7 @@ const ProductManagement = () => {
             <div className="text-center py-12">
               <p className="text-gray-500">Belum ada produk.</p>
               <button
-                onClick={handleAddProduct}
+                onClick={handleOpenAddProduct}
                 className="mt-4 text-blue-500 hover:underline"
               >
                 Tambah produk pertama
@@ -175,6 +195,14 @@ const ProductManagement = () => {
             </div>
           )}
         </div>
+        {showAddProductPortal && (
+          <AddProductPortal
+            onClose={handleCloseAddProduct}
+            onSubmit={submitAddProduct}
+            categorys={groupedProducts}
+            inputTypes={inputStyle}
+          />
+        )}
       </div>
     </>
   );

@@ -1,11 +1,16 @@
 import { prisma } from "../../config/prisma.js";
 
-// Get all products with category - name
+// Get all products with category - name, id
 const loadProducts = async () => {
   try {
     const result = await prisma.products.findMany({
       include: {
         categories: {
+          select: {
+            name: true,
+          },
+        },
+        product_items: {
           select: {
             name: true,
           },
@@ -96,10 +101,32 @@ const getTotalProductSold = async () => {
   }
 };
 
+// Create product
+const createProduct = async (productData, catId, inputStyleId) => {
+  try {
+    const result = await prisma.products.create({
+      data: {
+        category_id: catId,
+        name: productData.name,
+        description: productData.desc,
+        is_available:
+          productData.isAvailable === "true" ||
+          productData.isAvailable === true,
+        image: productData.thumbnailFileName || null,
+        input_type_id: inputStyleId,
+      },
+    });
+    return { data: result };
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export {
   loadProducts,
   getProductId,
   getProductIdWithCategory,
   getTotalProduct,
   getTotalProductSold,
+  createProduct,
 };

@@ -3,46 +3,8 @@ import { Portal } from "../Portal";
 import UploadSection from "../payment_portal/UploadSection";
 import { useFileValidation } from "../../../hooks/useFileValidation";
 import { XMarkIcon, PhotoIcon } from "@heroicons/react/24/solid";
-import { useParams } from "react-router-dom";
-
-// Form Input Component
-const FormInput = ({
-  label,
-  type = "text",
-  value,
-  onChange,
-  disabled,
-  placeholder,
-  error,
-}) => (
-  <div className="flex flex-col gap-1">
-    <label className="text-sm font-medium text-gray-700">{label}</label>
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      placeholder={placeholder}
-      className={`px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-        error ? "border-red-500 bg-red-50" : "border-gray-300"
-      } ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
-    />
-    {error && <span className="text-xs text-red-500">{error}</span>}
-  </div>
-);
-
-// Checkbox Component
-const FormCheckbox = ({ label, checked, onChange }) => (
-  <label className="flex items-center gap-2 cursor-pointer select-none">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-    />
-    <span className="text-sm text-gray-700">{label}</span>
-  </label>
-);
+import { FormInput } from "../../formInput";
+import { FormCheckbox } from "../../FormCheckbox";
 
 // Main Component
 export const AddItemPortal = ({ onClose, onSubmit, productName }) => {

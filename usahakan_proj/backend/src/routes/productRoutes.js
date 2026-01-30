@@ -4,6 +4,7 @@ import {
   getProductIdWithCategory,
   getInputFieldsByProductName,
 } from "../controllers/product/index.js";
+import multer from "multer";
 
 const router = express.Router();
 

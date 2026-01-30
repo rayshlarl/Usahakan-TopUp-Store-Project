@@ -12,3 +12,14 @@ export const getDahsboardData = async () => {
 
   return response.data;
 };
+
+// Data lain
+
+export const getInputTypes = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/inputTypes`);
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getItemByProductName } from "../api";
 import { deleteItemById } from "../api";
 import { createItem } from "../api";
+import { updateItem } from "../api";
 import { Header } from "../components/Header";
 // Import from barrel file in item_management
 import {
@@ -22,7 +23,7 @@ const ItemManagement = () => {
   const [items, setItems] = useState([]);
   const [showAddItemPortal, setShowAddItemPortal] = useState(false);
   const [showEditItemPortal, setShowEditItemPortal] = useState(false);
-  const [itemKey, setItemKey] = useState(); // --> diambil dari map.keys
+  const [indexKey, setIndexKey] = useState(); // --> current item index
 
   //Custom Hooks
   const { submitOrder } = useOrderAction();
@@ -37,14 +38,14 @@ const ItemManagement = () => {
     console.log("Add item");
     setShowAddItemPortal(true);
   };
-  // Handle close item portal
+  // Handle close add item portal
   const handleCloseAddItemPortal = () => {
     setShowAddItemPortal(false);
   };
 
-  //Handler submit add data
-  const getSubmitData = async (orderData) => {
-    const response = await createItem(orderData);
+  //Handler submit add data - fetching
+  const submitAddData = async (itemData) => {
+    const response = await createItem(itemData);
     if (response.success) {
       window.location.reload();
     } else {
@@ -53,14 +54,23 @@ const ItemManagement = () => {
   };
 
   // Handle Open edit item portal
-  const handleOpenEditItem = async (itemId, itemIndex) => {
+  const handleOpenEditItem = async (itemId, index) => {
     setShowEditItemPortal(true);
-    setItemKey(itemIndex);
+    setIndexKey(index);
   };
   // Handle Close edit item portal
   const handleCloseEditItemPortal = () => {
     setShowEditItemPortal(false);
-    setItemKey(null);
+    setIndexKey(null);
+  };
+  //Handler submit editing item data -> Fetching
+  const submitEditData = async (itemData, id) => {
+    try {
+      const response = await updateItem(itemData);
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Handle delete item
@@ -68,7 +78,8 @@ const ItemManagement = () => {
     const isConfirmed = confirm("Yakin mau hapus item ini?");
     if (!isConfirmed) return;
     const response = await deleteItemById(itemId);
-    setItems((prev) => prev.filter((item) => item.id !== itemId));
+    window.location.reload();
+    // setItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
   useEffect(() => {
@@ -99,10 +110,10 @@ const ItemManagement = () => {
 
           {/* Items Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((item, key) => (
+            {items.map((item, index) => (
               <ItemCard
-                key={key}
-                itemKeyFromMap={key} // --> Ngirim item key
+                key={index}
+                index={index}
                 item={item}
                 onEdit={handleOpenEditItem}
                 onDelete={handleDeleteItem}
@@ -126,16 +137,16 @@ const ItemManagement = () => {
         {showAddItemPortal && (
           <AddItemPortal
             onClose={handleCloseAddItemPortal}
-            onSubmit={getSubmitData}
+            onSubmit={submitAddData}
             productName={productName}
           />
         )}
         {showEditItemPortal && (
           <EditItemPortal
             onClose={handleCloseEditItemPortal}
-            productName={productName}
+            onSubmit={submitEditData}
             selectedItem={items}
-            itemIndex={itemKey}
+            index={indexKey}
           />
         )}
       </div>

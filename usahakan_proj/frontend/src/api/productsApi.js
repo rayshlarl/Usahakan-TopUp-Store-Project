@@ -2,23 +2,18 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const getDefaultData = async () => {
+// --> Load products and category
+export const loadProductsAndCategory = async () => {
   const response = await axios.get(`${API_URL}`);
   return response.data;
 };
 
+//                                                                    <== item fetch section
+
+// --> load item based on cate and prod
 export const getProductItems = async (category, product_name) => {
   const response = await axios.get(`${API_URL}/${category}/${product_name}`);
   return response.data;
-};
-
-export const getCategoryProduct = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/products`);
-    return response.data;
-  } catch (err) {
-    console.error(err);
-  }
 };
 
 export const getItemByProductName = async (productName) => {
@@ -51,6 +46,50 @@ export const createItem = async (itemData) => {
       formData.append("icon", file);
     }
     const response = await axios.post(`${API_URL}/products/item`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const updateItem = async (itemData) => {
+  console.log(itemData.itemId);
+  try {
+    const { file, filename, iconData, ...restData } = itemData;
+    const formData = new FormData();
+
+    formData.append("itemData", JSON.stringify({ ...restData, iconData }));
+    if (file) {
+      formData.append("icon", file);
+    }
+    const response = await axios.put(
+      `${API_URL}/products/updateItem/${itemData.itemId}`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+//                                                                        <== products fetch section
+
+//create new product
+export const createProduct = async (productData) => {
+  try {
+    const { file, fileName, ...restData } = productData;
+
+    const formData = new FormData();
+    formData.append("productData", JSON.stringify(restData));
+    if (file) {
+      formData.append("thumbnails", file);
+    }
+    const response = await axios.post(`${API_URL}/products`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;

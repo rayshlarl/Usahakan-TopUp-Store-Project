@@ -10,4 +10,18 @@ const getTotalCategory = async () => {
   }
 };
 
-export { getTotalCategory };
+//Ambil category berdasarkan nama cat nya
+const getCategoryId = async (catName) => {
+  try {
+    const result = await prisma.categories.findFirst({
+      where: {
+        name: catName,
+      },
+    });
+    return { data: result };
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export { getTotalCategory, getCategoryId };

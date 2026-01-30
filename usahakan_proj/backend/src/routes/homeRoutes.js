@@ -11,7 +11,6 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await loadProducts();
-
     return res.status(201).json({
       result,
     });

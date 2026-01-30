@@ -6,8 +6,9 @@ import authRoutes from "./routes/authRoutes.js";
 import registerRoutes from "./routes/registerRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import productManagementRoutes from "./routes/productManagementRoutes.js";
 import itemManagementRoutes from "./routes/itemManagementRoutes.js";
+import productManagementRoutes from "./routes/productManagementRoutes.js";
+import inputTypesRoutes from "./routes/inputFieldsRoutes.js";
 
 const app = express();
 
@@ -20,8 +21,9 @@ app.use("/", express.static("public"));
 app.use("/", homeRoutes);
 app.use("/", authRoutes);
 app.use("/", registerRoutes);
-app.use("/", productManagementRoutes);
 app.use("/", itemManagementRoutes); // fix - dynamix
+app.use("/", productManagementRoutes);
+app.use("/", inputTypesRoutes);
 app.use("/", productRoutes); // 2 2 nya dynamic
 app.use("/", dashboardRoutes);
 app.use("/", orderRoutes);
