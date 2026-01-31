@@ -24,9 +24,10 @@ app.use("/", registerRoutes);
 app.use("/", itemManagementRoutes); // fix - dynamix
 app.use("/", productManagementRoutes);
 app.use("/", inputTypesRoutes);
-app.use("/", productRoutes); // 2 2 nya dynamic
+
 app.use("/", dashboardRoutes);
 app.use("/", orderRoutes);
+app.use("/", productRoutes); // 2 2 nya dynamic
 
 // 404 Handler
 app.use((req, res) => {

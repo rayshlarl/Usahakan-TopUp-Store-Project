@@ -3,6 +3,7 @@ import multer from "multer";
 import { getCategoryId } from "../controllers/categoryController.js";
 import { createProduct } from "../controllers/product/productQueries.js";
 import { getInputTypesId } from "../controllers/product/inputFieldQueries.js";
+import { updateProduct } from "../controllers/product/productQueries.js";
 
 const router = express.Router();
 
@@ -43,5 +44,41 @@ router.post("/products", upload.single("thumbnails"), async (req, res) => {
     console.error(err);
   }
 });
+
+//Update item
+router.put(
+  "/updateProduct/:productId",
+  upload.single("thumbnails"),
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+      console.log("DEBUG productId:", productId);  // ← debug
+      const productData = JSON.parse(req.body.productData);
+      const productFile = req.file;
+
+      //Get the cate id
+      const getCatId = await getCategoryId(productData.category);
+      const catId = getCatId.data.id;
+
+      //Get the input id
+      const inputId = await getInputTypesId(productData.inputStyle);
+
+      //Get the fileName
+      const thumbnailFileName = productFile ? productFile.filename : null;
+
+      //Fetch the data
+      const response = await updateProduct(
+        { ...productData, id: productId, thumbnailFileName },
+        catId,
+        inputId.id
+      );
+
+      res.status(200).json({ success: true, data: response });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
 
 export default router;

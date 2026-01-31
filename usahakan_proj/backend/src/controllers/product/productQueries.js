@@ -15,6 +15,14 @@ const loadProducts = async () => {
             name: true,
           },
         },
+        input_types: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        id: "asc",
       },
     });
 
@@ -122,6 +130,30 @@ const createProduct = async (productData, catId, inputStyleId) => {
   }
 };
 
+// Update Product
+const updateProduct = async (productData, catId, InputId) => {
+  try {
+    const result = await prisma.products.update({
+      where: {
+        id: parseInt(productData.id),
+      },
+      data: {
+        category_id: catId,
+        input_type_id: InputId,
+        name: productData.name,
+        description: productData.desc,
+        is_available:
+          productData.isAvailable === "true" ||
+          productData.isAvailable === true,
+        image: productData.thumbnailFileName || null,
+      },
+    });
+    return { data: result };
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export {
   loadProducts,
   getProductId,
@@ -129,4 +161,5 @@ export {
   getTotalProduct,
   getTotalProductSold,
   createProduct,
+  updateProduct,
 };

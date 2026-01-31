@@ -11,8 +11,8 @@ import {
   PageHeader,
   ItemCard,
 } from "../components/item_management/index";
-import { AddItemPortal } from "../components/portal/AddItemPortal/AddItem";
-import { EditItemPortal } from "../components/portal/EditItemPortal/editItem";
+import { AddItemPortal } from "../components/portal/ItemPortal/itemPortal";
+// import { EditItemPortal } from "../components/portal/EditItemPortal/editItem";
 import { useOrderAction } from "../hooks/useOrderAction";
 
 // Main Component
@@ -135,18 +135,20 @@ const ItemManagement = () => {
           )}
         </div>
         {showAddItemPortal && (
-          <AddItemPortal
+          <ItemPortal
             onClose={handleCloseAddItemPortal}
             onSubmit={submitAddData}
             productName={productName}
+            isEdit={false}
           />
         )}
         {showEditItemPortal && (
-          <EditItemPortal
+          <ItemPortal
             onClose={handleCloseEditItemPortal}
             onSubmit={submitEditData}
             selectedItem={items}
             index={indexKey}
+            isEdit={true}
           />
         )}
       </div>

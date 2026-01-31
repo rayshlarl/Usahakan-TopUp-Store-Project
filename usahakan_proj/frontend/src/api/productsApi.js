@@ -98,6 +98,30 @@ export const createProduct = async (productData) => {
   }
 };
 
+//update Product
+//update Product
+export const updateProduct = async (productData) => {
+  try {
+    const { file, filename, ...restData } = productData;
+
+    const formData = new FormData();
+    formData.append("productData", JSON.stringify(restData));
+    if (file) {
+      formData.append("thumbnails", file);
+    }
+    const response = await axios.put(
+      `${API_URL}/updateProduct/${productData.id}`,
+      formData, //
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const getUploadUrl = (folder, filename) => {
   return `${API_URL}/${folder}/${filename}`;
 };

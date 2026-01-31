@@ -1,107 +1,33 @@
 import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  CubeTransparentIcon,
-} from "@heroicons/react/24/solid";
-import { createProduct, loadProductsAndCategory } from "../api";
+import { PlusIcon, CubeTransparentIcon } from "@heroicons/react/24/solid";
+import { createProduct, loadProductsAndCategory, updateProduct } from "../api";
 import { getInputTypes } from "../api";
-import { useNavigate } from "react-router-dom";
-import { AddProductPortal } from "../components/portal/AddProductPortal/addProduct";
-import { createPortal } from "react-dom";
-
-// Product Card Component
-const ProductCard = ({ product, onEdit, onDelete }) => {
-  const navigate = useNavigate();
-  return (
-    <div
-      onClick={() => navigate(`/products/${product.name}`)}
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
-    >
-      {/* Product Image */}
-      <img
-        src={product.image}
-        alt={product.name}
-        className="w-20 h-20 rounded-lg object-cover"
-      />
-
-      {/* Product Info */}
-      <div className="flex-1">
-        <span className="text-xs font-semibold text-blue-500 uppercase">
-          {product.category}
-        </span>
-        <h3 className="font-bold text-gray-800">{product.name}</h3>
-        <p className="text-sm text-gray-500 line-clamp-2">
-          {product.description}
-        </p>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={(e) => {
-              onDelete(product.id);
-              e.stopPropagation();
-            }}
-            className="flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 cursor-pointer"
-          >
-            <TrashIcon className="w-4 h-4" />
-            <span className="text-sm">Hapus</span>
-          </button>
-          <button
-            onClick={(e) => {
-              onEdit(product.id);
-              e.stopPropagation();
-            }}
-            className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
-          >
-            <PencilIcon className="w-4 h-4" />
-            <span className="text-sm">Ubah</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { FormProductPortal } from "../components/portal/productPortal/productPortal";
+import { ProductCard } from "../components/productCard";
 
 // Main Component
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState([]);
   const [inputStyle, setInputStyle] = useState([]);
   const [showAddProductPortal, setShowAddProductPortal] = useState(false);
-
-  // Handler untuk tambah produk
-  const handleOpenAddProduct = () => {
-    setShowAddProductPortal(true);
-  };
-
-  // Handler Close add produk
-  const handleCloseAddProduct = () => {
-    setShowAddProductPortal(false);
-  };
+  const [showEditProductPortal, setShowEditProductPortal] = useState(false);
 
   // Submit add product handler
   const submitAddProduct = async (productData) => {
     const result = await createProduct(productData);
   };
 
-  // Handler untuk edit produk
-  const handleEditProduct = (productId) => {
-    console.log("Edit produk:", productId);
-    // TODO: Implement edit product modal/page
-  };
-
   // Submit edit product handler
-  const submitEditproduct = () => {
-    console.log("Jalan wok");
+  const submitEditproduct = async (productData) => {
+    const response = await updateProduct(productData);
+    console.log("Jalan wok"); // TODO >>> update fetching
   };
 
   // Handler untuk hapus produk
   const handleDeleteProduct = (productId) => {
-    const isConfirmed = confirm("Yakin mau hapus produk ini?");
-    if (!isConfirmed) return;
-    setProducts((prev) => prev.filter((p) => p.id !== productId));
+    console.log(productId);
   };
 
   //fetch the input types, categories - products
@@ -143,7 +69,7 @@ const ProductManagement = () => {
               <p className="text-gray-500">Kelola produk digital Anda.</p>
             </div>
             <button
-              onClick={handleOpenAddProduct}
+              onClick={() => setShowAddProductPortal(true)}
               className="flex items-center gap-2 bg-blue-500 text-white px-5 py-3 rounded-xl hover:bg-blue-600 cursor-pointer"
             >
               <PlusIcon className="w-5 h-5" />
@@ -172,7 +98,10 @@ const ProductManagement = () => {
                       <ProductCard
                         key={product.id}
                         product={product}
-                        onEdit={handleEditProduct}
+                        onEdit={() => {
+                          setShowEditProductPortal(true);
+                          setSelectedProduct(product);
+                        }}
                         onDelete={handleDeleteProduct}
                       />
                     ))}
@@ -187,7 +116,7 @@ const ProductManagement = () => {
             <div className="text-center py-12">
               <p className="text-gray-500">Belum ada produk.</p>
               <button
-                onClick={handleOpenAddProduct}
+                onClick={() => setShowAddProductPortal}
                 className="mt-4 text-blue-500 hover:underline"
               >
                 Tambah produk pertama
@@ -195,12 +124,26 @@ const ProductManagement = () => {
             </div>
           )}
         </div>
+
         {showAddProductPortal && (
-          <AddProductPortal
-            onClose={handleCloseAddProduct}
+          <FormProductPortal
+            onClose={() => setShowAddProductPortal(false)}
             onSubmit={submitAddProduct}
             categorys={groupedProducts}
             inputTypes={inputStyle}
+            defaultValue={null}
+            isEdit={false}
+          />
+        )}
+
+        {showEditProductPortal && (
+          <FormProductPortal
+            onClose={() => setShowEditProductPortal(false)}
+            onSubmit={submitEditproduct}
+            categorys={groupedProducts}
+            inputTypes={inputStyle}
+            defaultValue={selectedProduct}
+            isEdit={true}
           />
         )}
       </div>
